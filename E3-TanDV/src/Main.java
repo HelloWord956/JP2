@@ -23,11 +23,11 @@ public class Main {
 
         int choice = -1;
 
-        rooms.add(new Room("RS001", roomType.Single, 8));
-        rooms.add(new Room("RD001", roomType.Double, 12));
-        rooms.add(new Room("RQ002", roomType.Queen, 35));
-        rooms.add(new Room("RT001", roomType.Triple, 12.5f));
-        rooms.add(new Room("RS001", roomType.Quad, 20.5f));
+        rooms.add(new Room("RS001", roomType.Single, 8, 10));
+        rooms.add(new Room("RD001", roomType.Double, 12, 5));
+        rooms.add(new Room("RQ002", roomType.Queen, 35, 2));
+        rooms.add(new Room("RT001", roomType.Triple, 12.5f, 3));
+        rooms.add(new Room("RS001", roomType.Quad, 20.5f, 3));
 
         customers.add(new Customer(1, "Mr.Linus Torvald", "84125325346457"));
         customers.add(new Customer(2, "Mr.Bill", "91124235346467"));
@@ -54,7 +54,7 @@ public class Main {
                     bookingController.findBooking();
                     break;
                 case 3:
-                    bookingController.revenueByRoomType();
+                    bookingController.displayRevenueByRoomType();
                     break;
                 case 4:
                     bookingController.displayHighestRevenue();
