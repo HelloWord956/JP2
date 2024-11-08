@@ -29,6 +29,10 @@ public class BookingService {
         return customers;
     }
 
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
     public Optional<Booking> bookRoom(Customer customer, String roomId, int daysToBook) {
         Optional<Room> room = rooms.stream()
                 .filter(r -> r.getId().equalsIgnoreCase(roomId))

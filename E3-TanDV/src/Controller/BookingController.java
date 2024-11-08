@@ -5,9 +5,9 @@ import Entity.Customer;
 import Entity.Room;
 import Service.BookingService;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Scanner;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class BookingController {
     private BookingService bookingService;
@@ -18,13 +18,6 @@ public class BookingController {
 
     public void bookRoom() {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Enter customer name: ");
-        String cus_name = sc.nextLine();
-        System.out.println("Enter customer phone: ");
-        String cus_phone = sc.nextLine();
-
-        Customer customer = findOrCreateCustomer(cus_name, cus_phone);
-
         System.out.println("Available room service:");
         showAvailableRooms();
 
@@ -33,6 +26,14 @@ public class BookingController {
 
         System.out.println("Enter the number of days to book: ");
         int daysToBook = sc.nextInt();
+        sc.nextLine();
+
+        System.out.println("Enter customer name: ");
+        String cus_name = sc.nextLine();
+        System.out.println("Enter customer phone: ");
+        String cus_phone = sc.nextLine();
+
+        Customer customer = findOrCreateCustomer(cus_name, cus_phone);
 
         Optional<Booking> booking = bookingService.bookRoom(customer, room_id, daysToBook);
 
@@ -78,8 +79,25 @@ public class BookingController {
     }
 
     private void showAvailableRooms() {
+        LocalDateTime now = LocalDateTime.now();
+
+        Map<String, Integer> roomsInUse = new HashMap<>();
+
+        for (Booking booking : bookingService.getBookings()) {
+            if (now.isBefore(booking.getCheck_out_datetime())) {
+                String roomId = booking.getRoom().getId();
+                roomsInUse.put(roomId, roomsInUse.getOrDefault(roomId, 0) + 1);
+            }
+        }
+
         for (Room room : bookingService.getRooms()) {
-            System.out.println(room);
+            int totalRooms = room.getNumber_of_rooms();
+            int roomsOccupied = roomsInUse.getOrDefault(room.getId(), 0);
+
+            int availableRooms = totalRooms - roomsOccupied;
+            if (availableRooms > 0) {
+                System.out.println("Room " + room.getRoomType() + "(ID:" + room.getId() + ")" + " has " + availableRooms + " rooms available.");
+            }
         }
     }
 
