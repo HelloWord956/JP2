@@ -33,28 +33,45 @@ public class BookingService {
         return bookings;
     }
 
-    public Optional<Booking> bookRoom(Customer customer, String roomId, int daysToBook) {
-        Optional<Room> room = rooms.stream()
-                .filter(r -> r.getId().equalsIgnoreCase(roomId))
-                .findFirst();
+    public boolean isRoomAvailable(String roomId, LocalDateTime checkIn, LocalDateTime checkOut) {
+        List<Booking> bookingList = bookings.stream()
+                .filter(booking -> booking.getRoom().getId().equalsIgnoreCase(roomId))
+                .toList();
 
-        if (room.isPresent()) {
-            Room roomToBook = room.get();
-
-            long bookedRooms = bookings.stream()
-                    .filter(booking -> booking.getRoom().equals(roomToBook))
-                    .count();
-
-            if (roomToBook.getNumber_of_rooms() - bookedRooms > 0) {
-                Booking booking = new Booking(bookings.size() + 1, roomToBook, customer, LocalDateTime.now(), LocalDateTime.now().plusDays(daysToBook));
-                bookings.add(booking);
-                return Optional.of(booking);
-            } else {
-                return Optional.empty();
+        for (Booking booking : bookingList) {
+            if(!(checkOut.isBefore(booking.getCheck_in_datetime()) || checkIn.isAfter(booking.getCheck_out_datetime()))) {
+                return false;
             }
         }
 
-        return Optional.empty();
+        return true;
+    }
+
+    public Optional<Booking> bookRoom(Customer customer, String roomId, LocalDateTime checkIn, LocalDateTime checkOut) {
+        if (checkIn == null || checkOut == null) {
+            System.out.println("Invalid date format. Please use the format yyyy-MM-dd HH:mm.");
+            return Optional.empty();
+        }
+
+        Optional<Room> roomOpt = rooms.stream()
+                .filter(room -> room.getId().equalsIgnoreCase(roomId))
+                .findFirst();
+
+        if (roomOpt.isPresent()) {
+            Room roomToBook = roomOpt.get();
+
+            if (isRoomAvailable(roomToBook.getId(), checkIn, checkOut)) {
+                Booking booking = new Booking(bookings.size() + 1, roomToBook, customer, checkIn, checkOut);
+                bookings.add(booking);
+                return Optional.of(booking);
+            } else {
+                System.out.println("Room is not available for the selected dates.");
+                return Optional.empty();
+            }
+        } else {
+            System.out.println("Room ID not found.");
+            return Optional.empty();
+        }
     }
 
     public Optional<Booking> findBooking(String customerName, String customerPhone, String roomId) {

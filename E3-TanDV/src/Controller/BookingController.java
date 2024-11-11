@@ -6,6 +6,7 @@ import Entity.Room;
 import Service.BookingService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,9 +25,24 @@ public class BookingController {
         System.out.println("Enter room id to book: ");
         String room_id = sc.nextLine();
 
-        System.out.println("Enter the number of days to book: ");
-        int daysToBook = sc.nextInt();
-        sc.nextLine();
+        System.out.println("Enter check-in date (yyyy-MM-dd HH:mm): ");
+        String checkInDateStr = sc.nextLine();
+        LocalDateTime checkIn = parseDateTime(checkInDateStr);
+
+        System.out.println("Enter check-out date (yyyy-MM-dd HH:mm): ");
+        String checkOutDateStr = sc.nextLine();
+        LocalDateTime checkOut = parseDateTime(checkOutDateStr);
+
+        if (checkIn == null || checkOut == null) {
+            System.out.println("Invalid date format. Please use the format yyyy-MM-dd HH:mm.");
+            return;
+        }
+
+        // Kiểm tra nếu ngày check-out trước check-in
+        if (checkOut.isBefore(checkIn)) {
+            System.out.println("Check-out date cannot be before check-in date.");
+            return;
+        }
 
         System.out.println("Enter customer name: ");
         String cus_name = sc.nextLine();
@@ -35,7 +51,8 @@ public class BookingController {
 
         Customer customer = findOrCreateCustomer(cus_name, cus_phone);
 
-        Optional<Booking> booking = bookingService.bookRoom(customer, room_id, daysToBook);
+        // Thực hiện đặt phòng
+        Optional<Booking> booking = bookingService.bookRoom(customer, room_id, checkIn, checkOut);
 
         if (booking.isPresent()) {
             System.out.println("Booking successfully: " + booking.get());
@@ -81,25 +98,29 @@ public class BookingController {
     private void showAvailableRooms() {
         LocalDateTime now = LocalDateTime.now();
 
-        Map<String, Integer> roomsInUse = new HashMap<>();
-
-        for (Booking booking : bookingService.getBookings()) {
-            if (now.isBefore(booking.getCheck_out_datetime())) {
-                String roomId = booking.getRoom().getId();
-                roomsInUse.put(roomId, roomsInUse.getOrDefault(roomId, 0) + 1);
-            }
-        }
-
+        // Lấy thông tin phòng và kiểm tra phòng nào còn trống
         for (Room room : bookingService.getRooms()) {
-            int totalRooms = room.getNumber_of_rooms();
-            int roomsOccupied = roomsInUse.getOrDefault(room.getId(), 0);
+            boolean isAvailable = true;
 
-            int availableRooms = totalRooms - roomsOccupied;
-            if (availableRooms > 0) {
-                System.out.println("Room " + room.getRoomType() + "(ID:" + room.getId() + ")" + " has " + availableRooms + " rooms available.");
+            // Kiểm tra các booking đã tồn tại của phòng này
+            for (Booking booking : bookingService.getBookings()) {
+                // Nếu phòng đang được đặt và trùng với khoảng thời gian hiện tại
+                if (booking.getRoom().getId().equals(room.getId()) &&
+                        (now.isBefore(booking.getCheck_out_datetime()) && now.isAfter(booking.getCheck_in_datetime()))) {
+                    isAvailable = false; // Phòng không trống
+                    break;
+                }
+            }
+
+            // Nếu phòng còn trống, in ra thông tin phòng
+            if (isAvailable) {
+                System.out.println("ID: " + room.getId() +
+                        ", Type: " + room.getRoomType() +
+                        ", Price per Hour: " + '$' + room.getPrice_per_hour());
             }
         }
     }
+
 
     private Customer findOrCreateCustomer(String name, String phone) {
         for (Customer customer : bookingService.getCustomers()) {
@@ -111,5 +132,14 @@ public class BookingController {
         Customer newCustomer = new Customer(newId, name, phone);
         bookingService.getCustomers().add(newCustomer);
         return newCustomer;
+    }
+
+    private LocalDateTime parseDateTime(String dateTimeStr) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            return LocalDateTime.parse(dateTimeStr, formatter);
+        } catch (Exception e) {
+            return null;  // Trả về null nếu định dạng không hợp lệ
+        }
     }
 }
