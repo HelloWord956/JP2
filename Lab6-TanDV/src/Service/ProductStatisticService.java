@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ProductStatisticService {
-    // Tổng hợp dữ liệu của các sản phẩm theo tháng và năm
     public Map<String, Map<Integer, ProductStatistics>> aggregateData(List<ProductStatistics> productStatisticsList) {
         Map<String, Map<Integer, ProductStatistics>> aggregatedData = new HashMap<>();
 
@@ -25,7 +24,6 @@ public class ProductStatisticService {
         return aggregatedData;
     }
 
-    // Tính toán tỷ lệ phần trăm cho từng sản phẩm theo tháng/năm
     public List<String> calculatePercentages(Map<String, Map<Integer, ProductStatistics>> aggregatedData) {
         List<String> outputLines = new ArrayList<>();
 
