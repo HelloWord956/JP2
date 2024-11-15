@@ -1,48 +1,62 @@
 package Service;
 
-import Entity.ProductStatistics;
+import Entity.StatisticsOutput;
+import Entity.StatisticsView;
+import General.IFileService;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileService {
-    public List<ProductStatistics> readFile(String path) {
-        List<ProductStatistics> productStatisticsList = new ArrayList<>();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(path));
-            String line;
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(";");
-                int productId = Integer.parseInt(data[0]);
-                int click = Integer.parseInt(data[1]);
-                int addToCart = Integer.parseInt(data[2]);
-                int checkOut = Integer.parseInt(data[3]);
-                LocalDate date = LocalDate.parse(data[4], formatter);
+public class FileService implements IFileService<StatisticsView> {
 
-                ProductStatistics product = new ProductStatistics(productId, click, addToCart, checkOut, date);
-                productStatisticsList.add(product);
+    public FileService() {;}
+
+    public List<StatisticsView> readFileStatistics(String fileInPath){
+        List<StatisticsView> statisticsViews = new ArrayList<>();
+        try{
+            BufferedReader br = new BufferedReader(new FileReader(fileInPath));
+            String line;
+            while((line = br.readLine()) != null) {
+                StatisticsView statisticsView = new StatisticsView();
+                if(!line.isEmpty()) {
+                    String[] data = line.split(";");
+                    statisticsView.setId(Integer.parseInt(String.valueOf(data[0])));
+                    statisticsView.setView(Integer.parseInt(String.valueOf(data[1])));
+                    statisticsView.setAddToCart(Integer.parseInt(String.valueOf(data[2])));
+                    statisticsView.setCheckOut(Integer.parseInt(String.valueOf(data[3])));
+                    statisticsView.setCreateAtDate(LocalDate.parse(String.valueOf(data[4])));
+                    statisticsViews.add(statisticsView);
+                }
             }
-            br.close();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
+        } catch(IOException e) {
+            e.getCause();
         }
-        return productStatisticsList;
+        return statisticsViews;
     }
 
-    public void writeFile(String path, List<String> outputLines) {
+    @Override
+    public List<StatisticsView> writeFileStatistics(String fileOutPath, List<StatisticsOutput> statisticsOutputs) {
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(path));
-            for (String line : outputLines) {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(fileOutPath));
+
+            for (StatisticsOutput output : statisticsOutputs) {
+                String line = String.format("%d, %.2f%%, %.2f%%, %.2f%%, %d-%d",
+                        output.getId(),
+                        output.getViewPercentage(),
+                        output.getAddToCartPercentage(),
+                        output.getCheckOutPercentage(),
+                        output.getYear(),
+                        output.getMonth());
                 bw.write(line);
                 bw.newLine();
             }
             bw.close();
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.getCause();
         }
+
+        return List.of();
     }
 }
