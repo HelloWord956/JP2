@@ -37,10 +37,8 @@ public class FileService implements IFileService<StatisticsView> {
     }
 
     @Override
-    public List<StatisticsView> writeFileStatistics(String fileOutPath, List<StatisticsOutput> statisticsOutputs) {
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(fileOutPath));
-
+    public void writeFileStatistics(String fileOutPath, List<StatisticsOutput> statisticsOutputs) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileOutPath))) {
             for (StatisticsOutput output : statisticsOutputs) {
                 String line = String.format("%d, %.2f%%, %.2f%%, %.2f%%, %d-%d",
                         output.getId(),
@@ -52,11 +50,8 @@ public class FileService implements IFileService<StatisticsView> {
                 bw.write(line);
                 bw.newLine();
             }
-            bw.close();
         } catch (IOException e) {
             e.getCause();
         }
-
-        return List.of();
     }
 }

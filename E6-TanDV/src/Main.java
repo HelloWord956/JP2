@@ -8,7 +8,6 @@ public class Main {
         String inputFile = "../data/orderDetail.in.txt";
         String outputFile = "../data/orderDetail.out.txt";
         try {
-            System.out.println("Current working directory: " + System.getProperty("user.dir"));
             List<OrderDetail> orderDetails = readFile(inputFile);
 
             Map<Integer, Double> customerBill = calculateBilling(orderDetails);
