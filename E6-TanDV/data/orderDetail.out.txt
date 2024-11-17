@@ -1,3 +1,9 @@
-CustomerId;TotalAmount
-600.00
-610.00
+Customer ID: 1
+Product ID: 121, Quantity: 2, Price: 120.00, Total: 240.00
+Product ID: 122, Quantity: 1, Price: 125.00, Total: 125.00
+Total Amount: 365.00
+
+Customer ID: 2
+Product ID: 125, Quantity: 10, Price: 105.00, Total: 1050.00
+Total Amount: 1050.00
+

@@ -12,6 +12,8 @@ public class OrderDetail {
         this.id = id;
         this.orderId = orderId;
         this.productId = productId;
+        this.quantity = quantity;
+        this.price = price;
     }
 
     public int getId() {
@@ -52,9 +54,5 @@ public class OrderDetail {
 
     public void setPrice(double price) {
         this.price = price;
-    }
-
-    public double getTotalPrice(){
-        return price * quantity;
     }
 }
