@@ -8,7 +8,6 @@ import Service.FileService;
 import java.util.List;
 
 public class StatisticsController {
-    // new code
     private final StatisticsService statisticsService;
     private final FileService fileService;
 
